@@ -1,0 +1,37 @@
+# Unreal Engine standard ignores
+
+# Build artifacts
+Binaries/
+DerivedDataCache/
+Intermediate/
+Saved/
+.vscode/
+.idea/
+
+# Build system
+*.sln
+*.VC.db
+*.VC.opendb
+*.suo
+*.user
+*.userprefs
+
+# Other
+*.log
+*.tlog
+*.obj
+*.pdb
+*.exe
+*.dll
+
+# Generated files
+*.generated.*
+*.gen.cpp
+*.gen.h
+
+# Local config
+Config/DefaultEditor.ini
+Config/DefaultEditorPerProjectUserSettings.ini
+
+# Optional - if you want to keep source control clean
+Saved/Backup/
