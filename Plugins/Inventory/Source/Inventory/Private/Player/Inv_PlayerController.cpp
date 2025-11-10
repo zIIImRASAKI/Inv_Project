@@ -3,6 +3,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "ToolContextInterfaces.h"
 #include "Engine/LocalPlayer.h"
+#include "Interaction/Inv_Highlightable.h"
 #include "Items/Components/Inv_ItemComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Widgets/Input/SVirtualJoystick.h"
@@ -120,6 +121,10 @@ void AInv_PlayerController::TraceForItem()
 
 	if (ThisActor.IsValid())
 	{
+		if (UActorComponent* Highlightable = ThisActor->FindComponentByInterface(UInv_Highlightable::StaticClass());IsValid(Highlightable))
+		{
+			IInv_Highlightable::Execute_Highlight(Highlightable);
+		}
 		UInv_ItemComponent* ItemComponent = ThisActor->FindComponentByClass<UInv_ItemComponent>();
 		if (!IsValid(ItemComponent)) return;
 
@@ -128,18 +133,11 @@ void AInv_PlayerController::TraceForItem()
 			HUDWidget->ShowPickupMessage(ItemComponent->GetPickupMessage());
 		}
 	}
-
-	
-	
-	if (ThisActor.IsValid())
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Started tracing a new actor"));
-	}
 	if (LastActor.IsValid())
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Stopped tracing last actor"));
+		if (UActorComponent* Highlightable = LastActor->FindComponentByInterface(UInv_Highlightable::StaticClass());IsValid(Highlightable))
+		{
+			IInv_Highlightable::Execute_Unhighlight(Highlightable);
+		}
 	}
-	
-	
-	
 }
