@@ -1,9 +1,11 @@
 ﻿#include "Player/Inv_PlayerController.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "InputMappingContext.h"
 #include "ToolContextInterfaces.h"
 #include "Engine/LocalPlayer.h"
 #include "Interaction/Inv_Highlightable.h"
+#include "InventoryManagment/components/Inv_InventoryComponent.h"
 #include "Items/Components/Inv_ItemComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Widgets/Input/SVirtualJoystick.h"
@@ -23,42 +25,22 @@ void AInv_PlayerController::Tick(float DeltaTime)
 }
 
 
+
+
 void AInv_PlayerController::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (SVirtualJoystick::ShouldDisplayTouchInterface() && IsLocalPlayerController())
-	{
-		// 可选：移动端触控界面
-	}
-
 	if (UEnhancedInputLocalPlayerSubsystem* Subsystem =
 		ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer()))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Subsystem 获取成功！"));
+		Subsystem->ClearAllMappings();
 
-		/*让两个 IMC 都生效，只要优先级不冲突即可*/
 		if (OLDIMC)
-		{
 			Subsystem->AddMappingContext(OLDIMC, 0);
-			UE_LOG(LogTemp, Warning, TEXT("添加 OLDIMC (优先级 0)"));
-		}
-		else
-		{
-			UE_LOG(LogTemp, Error, TEXT("OLDIMC 是空的！"));
-		}
-
 		if (DefaultIMC)
-		{
 			Subsystem->AddMappingContext(DefaultIMC, 1);
-			UE_LOG(LogTemp, Warning, TEXT("添加 DefaultIMC (优先级 1)"));
-		}
-		else
-		{
-			UE_LOG(LogTemp, Error, TEXT("DefaultIMC 是空的！"));
-		}
 
-		
 		Subsystem->RequestRebuildControlMappings();
 	}
 	else
@@ -66,6 +48,7 @@ void AInv_PlayerController::BeginPlay()
 		UE_LOG(LogTemp, Error, TEXT("Subsystem 获取失败！GetLocalPlayer() 可能是 NULL"));
 	}
 
+	InventoryComponent = FindComponentByClass<UInv_InventoryComponent>();
 	CreateHUDWidget();
 }
 
@@ -75,13 +58,22 @@ void AInv_PlayerController::SetupInputComponent()
 	Super::SetupInputComponent();
 
 	UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(InputComponent);
+	
 	EnhancedInputComponent->BindAction(PrimaryInteractAction, ETriggerEvent::Started, this, &AInv_PlayerController::PrimaryInteract);
+	EnhancedInputComponent->BindAction(ToggleInventoryAction, ETriggerEvent::Started, this, &AInv_PlayerController::ToggleInventory);
 }
 
 
 void AInv_PlayerController::PrimaryInteract()
 {
-	UE_LOG(LogTemp, Warning, TEXT("PrimaryInteract triggered!"));
+	UE_LOG(LogTemp, Warning, TEXT("DefaultIMC = %s"), *DefaultIMC->GetPathName());
+}
+
+void AInv_PlayerController::ToggleInventory()
+{
+	UE_LOG(LogTemp, Warning, TEXT("Press . !"));
+	if (!InventoryComponent.IsValid()) return;
+	InventoryComponent->ToggleInventoryMenu();
 }
 
 void AInv_PlayerController::CreateHUDWidget()
